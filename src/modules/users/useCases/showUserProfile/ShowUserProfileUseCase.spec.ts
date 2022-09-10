@@ -1,14 +1,10 @@
-import { create } from "domain";
 import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
-import { AuthenticateUserUseCase } from "../authenticateUser/AuthenticateUserUseCase";
-import { CreateUserUseCase } from "../createUser/CreateUserUseCase";
 import { ICreateUserDTO } from "../createUser/ICreateUserDTO";
+import { ShowUserProfileError } from "./ShowUserProfileError";
 import { ShowUserProfileUseCase } from "./ShowUserProfileUseCase";
 
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let showUserProfileUseCase: ShowUserProfileUseCase;
-let createUserUseCase: CreateUserUseCase;
-let authenticateUserUseCase: AuthenticateUserUseCase;
 
 describe("Show User Profile", () => {
   beforeEach(() => {
@@ -16,11 +12,6 @@ describe("Show User Profile", () => {
     showUserProfileUseCase = new ShowUserProfileUseCase(
       inMemoryUsersRepository
     );
-    authenticateUserUseCase = new AuthenticateUserUseCase(
-      inMemoryUsersRepository
-    );
-
-    createUserUseCase = new CreateUserUseCase(inMemoryUsersRepository);
   });
 
   it("should be able to show user profile", async () => {
@@ -30,7 +21,7 @@ describe("Show User Profile", () => {
       password: "1234",
     };
 
-    const { id } = await createUserUseCase.execute(user);
+    const { id } = await inMemoryUsersRepository.create(user);
 
     const result = await showUserProfileUseCase.execute(id);
 
@@ -38,5 +29,11 @@ describe("Show User Profile", () => {
     expect(result.name).toEqual(user.name);
     expect(result.email).toEqual(user.email);
     expect(result).toHaveProperty("password");
+  });
+
+  it("should not be able to show user profile if user does not exists", async () => {
+    await expect(
+      showUserProfileUseCase.execute("non-existent-user-id")
+    ).rejects.toEqual(new ShowUserProfileError());
   });
 });

@@ -8,8 +8,6 @@ import { GetBalanceUseCase } from "./GetBalanceUseCase";
 
 let inMemoryStatementsRepository: InMemoryStatementsRepository;
 let inMemoryUsersRepository: InMemoryUsersRepository;
-let createUserUseCase: CreateUserUseCase;
-let createStatementUseCase: CreateStatementUseCase;
 let getBalanceUseCase: GetBalanceUseCase;
 
 describe("Get Balance", () => {
@@ -22,17 +20,10 @@ describe("Get Balance", () => {
       inMemoryStatementsRepository,
       inMemoryUsersRepository
     );
-
-    createUserUseCase = new CreateUserUseCase(inMemoryUsersRepository);
-
-    createStatementUseCase = new CreateStatementUseCase(
-      inMemoryUsersRepository,
-      inMemoryStatementsRepository
-    );
   });
 
   it("should be able to get balance to a new user", async () => {
-    const user = await createUserUseCase.execute({
+    const user = await inMemoryUsersRepository.create({
       name: "John Doe",
       email: "johndoe@gmail.com",
       password: "123456",
@@ -45,7 +36,7 @@ describe("Get Balance", () => {
   });
 
   it("should be able to get balance to a user with a deposit", async () => {
-    const user = await createUserUseCase.execute({
+    const user = await inMemoryUsersRepository.create({
       name: "John Doe",
       email: "johndoe@gmail.com",
       password: "123456",
@@ -58,7 +49,7 @@ describe("Get Balance", () => {
       description: "Deposit",
     } as ICreateStatementDTO;
 
-    await createStatementUseCase.execute(deposit);
+    await inMemoryStatementsRepository.create(deposit);
 
     const balance = await getBalanceUseCase.execute({ user_id: user.id });
 
@@ -71,7 +62,7 @@ describe("Get Balance", () => {
   });
 
   it("should be able to get balance to a user with a withdraw", async () => {
-    const user = await createUserUseCase.execute({
+    const user = await inMemoryUsersRepository.create({
       name: "John Doe",
       email: "johndoe@gmail.com",
       password: "123456",
@@ -84,7 +75,7 @@ describe("Get Balance", () => {
       description: "Deposit",
     } as ICreateStatementDTO;
 
-    await createStatementUseCase.execute(deposit);
+    await inMemoryStatementsRepository.create(deposit);
 
     const withdraw = {
       user_id: user.id,
@@ -93,7 +84,7 @@ describe("Get Balance", () => {
       description: "Withdraw",
     } as ICreateStatementDTO;
 
-    await createStatementUseCase.execute(withdraw);
+    await inMemoryStatementsRepository.create(withdraw);
 
     const balance = await getBalanceUseCase.execute({ user_id: user.id });
 
