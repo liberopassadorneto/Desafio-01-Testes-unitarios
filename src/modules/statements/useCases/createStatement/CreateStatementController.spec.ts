@@ -28,6 +28,33 @@ describe("Create Statement Controller", () => {
     await connection.close();
   });
 
+  it("should not be able to create a new withdraw statement with insufficient funds", async () => {
+    const sessions = await request(app).post("/api/v1/sessions").send({
+      email: "username@email.com",
+      password: "test-password",
+    });
+
+    const { token } = sessions.body;
+
+    await request(app)
+      .post("/api/v1/statements/deposit")
+      .send({
+        amount: 50,
+        description: "Deposit test",
+      })
+      .set({ Authorization: `Bearer ${token}` });
+
+    const createWithdraw = await request(app)
+      .post("/api/v1/statements/withdraw")
+      .send({
+        amount: 500,
+        description: "Withdraw test",
+      })
+      .set({ Authorization: `Bearer ${token}` });
+
+    expect(createWithdraw.status).toBe(400);
+  });
+
   it("should be able to create a new deposit statement", async () => {
     const sessions = await request(app).post("/api/v1/sessions").send({
       email: "username@email.com",
@@ -72,35 +99,6 @@ describe("Create Statement Controller", () => {
       .set({ Authorization: `Bearer ${token}` });
 
     expect(createWithdraw.status).toBe(201);
-  });
-
-  it.only("should not be able to create a new withdraw statement with insufficient funds", async () => {
-    const sessions = await request(app).post("/api/v1/sessions").send({
-      email: "username@email.com",
-      password: "test-password",
-    });
-
-    const { token } = sessions.body;
-
-    await request(app)
-      .post("/api/v1/statements/deposit")
-      .send({
-        amount: 50,
-        description: "Deposit test",
-      })
-      .set({ Authorization: `Bearer ${token}` });
-
-    const createWithdraw = await request(app)
-      .post("/api/v1/statements/withdraw")
-      .send({
-        amount: 500,
-        description: "Withdraw test",
-      })
-      .set({ Authorization: `Bearer ${token}` });
-
-    console.log(createWithdraw.body);
-
-    expect(createWithdraw.status).toBe(400);
   });
 
   it("should not be able to create a new statement with a non-existing user", async () => {
