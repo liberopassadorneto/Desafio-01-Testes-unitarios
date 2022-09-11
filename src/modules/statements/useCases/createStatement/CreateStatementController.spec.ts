@@ -58,7 +58,7 @@ describe("Create Statement Controller", () => {
     await request(app)
       .post("/api/v1/statements/deposit")
       .send({
-        amount: 100,
+        amount: 50,
         description: "Deposit test",
       })
       .set({ Authorization: `Bearer ${token}` });
@@ -66,7 +66,7 @@ describe("Create Statement Controller", () => {
     const createWithdraw = await request(app)
       .post("/api/v1/statements/withdraw")
       .send({
-        amount: 50,
+        amount: 10,
         description: "Withdraw test",
       })
       .set({ Authorization: `Bearer ${token}` });
@@ -74,7 +74,7 @@ describe("Create Statement Controller", () => {
     expect(createWithdraw.status).toBe(201);
   });
 
-  it("should not be able to create a new withdraw statement with insufficient funds", async () => {
+  it.only("should not be able to create a new withdraw statement with insufficient funds", async () => {
     const sessions = await request(app).post("/api/v1/sessions").send({
       email: "username@email.com",
       password: "test-password",
@@ -100,7 +100,7 @@ describe("Create Statement Controller", () => {
 
     console.log(createWithdraw.body);
 
-    // expect(createWithdraw.status).toBe(400);
+    expect(createWithdraw.status).toBe(400);
   });
 
   it("should not be able to create a new statement with a non-existing user", async () => {
